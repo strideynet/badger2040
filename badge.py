@@ -49,7 +49,7 @@ def mode1(config, state, qr):
     
     if qr:
         code = qrcode.QRCode()
-        code.set_text("f.noahstride.co.uk")
+        code.set_text(config["qr_link"])
         draw_qr_code(198, 40+5, 96, code)
     else:
         image = bytearray(int(96 * 96 / 8))
@@ -148,7 +148,8 @@ def main(config):
 config = {
     "profile": "furry", # Dictates what the stored file is called
     "display_name": "Noah", # Name shown on header ??
-    "profile_picture": "pfp.bin"
+    "profile_picture": "pfp.bin",
+    "qr_link": "f.noahstride.co.uk"
 }
 main(config)
 
