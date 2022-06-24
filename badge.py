@@ -38,10 +38,12 @@ def mode1(config, state, qr):
     # Text
     display.thickness(2)
     display.pen(0)
+
     # TODO: Padding alignment
-    display.text("{}: {}".format(config["counters"][0]["label"], str(state["counters"][config["counters"][0]["key"]])), 8, 60, scale=0.8)
-    display.text("{}: {}".format(config["counters"][1]["label"], str(state["counters"][config["counters"][1]["key"]])),8, 85, scale=0.8)
-    display.text("{}: {}".format(config["counters"][2]["label"], str(state["counters"][config["counters"][2]["key"]])),8, 110, scale=0.8)
+    counter_y = 60
+    for counter in config["counters"]:
+        display.text("{}: {}".format(counter["label"], str(state["counters"][counter["key"]])), 8, counter_y, scale=0.8)
+        counter_y += 25
     
     if qr:
         code = qrcode.QRCode()
@@ -56,15 +58,15 @@ def mode1(config, state, qr):
 def handle_input(state):
     # Handle counters
     if display.pressed(badger2040.BUTTON_A):
-        state["counters"]["drinks"] += 1
+        state["counters"][config["counters"][0]["key"]] += 1
         return True
 
     if display.pressed(badger2040.BUTTON_B):
-        state["counters"]["twinks"] += 1
+        state["counters"][config["counters"][1]["key"]] += 1
         return True
         
     if display.pressed(badger2040.BUTTON_C):
-        state["counters"]["boops"] += 1
+        state["counters"][config["counters"][2]["key"]] += 1
         return True
     
     # Handle pagination
@@ -84,24 +86,24 @@ def handle_input(state):
     
     return False
 
-
-def default_state():
-    return {
-        "page": 0,
-        "counters": {
-            # TODO: Split counters based on page or some index ?
-            "drinks": 0,
-            "twinks": 0,
-            "boops": 0
-        }    
-    }
-
 def load_state(config):
+    state = {}
     try:
         with open("/state/{}.json".format(config["profile"])) as f:
-            return json.load(f)
+            state = json.load(f)
     except OSError:
-        return default_state()
+        # Default state
+        state = {
+            "page": 0,
+            "counters": {}    
+        }
+    
+    # Add zeroed out values for new counters
+    for counter in config["counters"]:
+        if counter["key"] not in state:
+            state[counter["key"]] = 0
+
+    return state
     
 def persist_state(config, state):
     print("persisting state:")
