@@ -100,8 +100,8 @@ def load_state(config):
     
     # Add zeroed out values for new counters
     for counter in config["counters"]:
-        if counter["key"] not in state:
-            state[counter["key"]] = 0
+        if counter["key"] not in state["counters"]:
+            state["counters"][counter["key"]] = 0
 
     return state
     
