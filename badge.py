@@ -29,10 +29,6 @@ def draw_qr_code(ox, oy, size, code):
 
 # Name Badge Mode
 def mode1(config, state, qr):
-    display.pen(15)
-    display.clear()
-    # Hello top banner
-    display.pen(0)
     display.rectangle(0, 0, 298, 40)
     display.thickness(4)
     display.font("sans")
@@ -43,9 +39,9 @@ def mode1(config, state, qr):
     display.thickness(2)
     display.pen(0)
     # TODO: Padding alignment
-    display.text("{}: {}".format(config["counters"][0]["label"], str(state["counters"]["drinks"])), 8, 60, scale=0.8)
-    display.text("{}: {}".format(config["counters"][1]["label"], str(state["counters"]["twinks"])),8, 85, scale=0.8)
-    display.text("{}: {}".format(config["counters"][2]["label"], str(state["counters"]["boops"])),8, 110, scale=0.8)
+    display.text("{}: {}".format(config["counters"][0]["label"], str(state["counters"][config["counters"][0]["key"]])), 8, 60, scale=0.8)
+    display.text("{}: {}".format(config["counters"][1]["label"], str(state["counters"][config["counters"][1]["key"]])),8, 85, scale=0.8)
+    display.text("{}: {}".format(config["counters"][2]["label"], str(state["counters"][config["counters"][2]["key"]])),8, 110, scale=0.8)
     
     if qr:
         code = qrcode.QRCode()
@@ -72,7 +68,7 @@ def handle_input(state):
         return True
     
     # Handle pagination
-    page_max = 2
+    page_max = 3
     if display.pressed(badger2040.BUTTON_UP):
         state["page"] += 1
         if state["page"] >= page_max:
@@ -127,8 +123,21 @@ def render(config, state):
     # TODO: Switch to different pages based on state.page
     # TODO: Support dynamically selecting different renderers based
     # on config.pages[0].renderer
-    show_qr = state["page"] == 1
-    mode1(config, state, show_qr)
+
+    # Start from a fresh slate, with display cleared, and pen reset to black.
+    display.pen(15)
+    display.clear()
+    display.pen(0)
+
+    page = state["page"]
+    if page == 0:
+        mode1(config, state, False)
+    elif page == 1:
+        mode1(config, state, True)
+    elif page == 2:
+        display.thickness(2)
+        display.font("sans")
+        display.text("Mystery third page", 0, 50, scale=1)
     display.update()
 
 def main(config):
@@ -153,7 +162,7 @@ config = {
     "counters": [
         {
             "key": "drinks",
-            "label": "Beers"
+            "label": "Drinks"
         },
         {
             "key": "twinks",
@@ -161,7 +170,7 @@ config = {
         },
         {
             "key": "boops",
-            "label": "Snoots"
+            "label": "Boops"
         }
     ]
 }
