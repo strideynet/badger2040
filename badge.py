@@ -43,9 +43,9 @@ def mode1(config, state, qr):
     display.thickness(2)
     display.pen(0)
     # TODO: Padding alignment
-    display.text("Drinks: " + str(state["counters"]["drinks"]),8, 60, scale=0.8)
-    display.text("Twinks: " + str(state["counters"]["twinks"]),8, 85, scale=0.8)
-    display.text("Boops: " + str(state["counters"]["boops"]),8, 110, scale=0.8)
+    display.text("{}: {}".format(config["counters"][0]["label"], str(state["counters"]["drinks"])), 8, 60, scale=0.8)
+    display.text("{}: {}".format(config["counters"][1]["label"], str(state["counters"]["twinks"])),8, 85, scale=0.8)
+    display.text("{}: {}".format(config["counters"][2]["label"], str(state["counters"]["boops"])),8, 110, scale=0.8)
     
     if qr:
         code = qrcode.QRCode()
@@ -149,7 +149,21 @@ config = {
     "profile": "furry", # Dictates what the stored file is called
     "display_name": "Noah", # Name shown on header ??
     "profile_picture": "pfp.bin",
-    "qr_link": "f.noahstride.co.uk"
+    "qr_link": "f.noahstride.co.uk",
+    "counters": [
+        {
+            "key": "drinks",
+            "label": "Beers"
+        },
+        {
+            "key": "twinks",
+            "label": "Boys"
+        },
+        {
+            "key": "boops",
+            "label": "Snoots"
+        }
+    ]
 }
 main(config)
 
