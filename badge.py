@@ -8,17 +8,19 @@ badger2040.system_speed(0) # lets save some battery
 display = badger2040.Badger2040()
 
 display.update_speed(2)
-class CounterPage():
-    def __init__(self, qr_url):
-        self.qr_url = qr_url
+
+class QRPicture():
+    def __init__(self, url):
+        self.url = url
 
     def measure_qr_code(self, size, code):
         w, h = code.get_size()
         module_size = int(size / w)
         return module_size * w, module_size
 
-    def draw_qr_code(self, ox, oy, size, code):
-        # TODO: Logic for centering QR code inside box based on actual size
+    def render(self, ox, oy, size):
+        code = qrcode.QRCode()
+        code.set_text(self.url)
         size, module_size = self.measure_qr_code(size, code)
         display.pen(15)
         display.rectangle(ox, oy, size, size)
@@ -27,6 +29,19 @@ class CounterPage():
             for y in range(size):
                 if code.get_module(x, y):
                     display.rectangle(ox + x * module_size, oy + y * module_size, module_size, module_size)
+
+class ImagePicture():
+    def __init__(self, path):
+        self.path = path
+    
+    def render(self, x, y, size):
+        image = bytearray(int(96 * 96 / 8))
+        open(self.path, "r").readinto(image)
+        display.image(image, size, size, x, y)
+
+class CounterPage():
+    def __init__(self, picture):
+        self.picture = picture
 
     def render(self, config, state):
         display.rectangle(0, 0, 298, 40)
@@ -45,18 +60,14 @@ class CounterPage():
             display.text("{}: {}".format(counter["label"], str(state["counters"][counter["key"]])), 8, counter_y, scale=0.8)
             counter_y += 25
         
-        if self.qr_url != "":
-            code = qrcode.QRCode()
-            code.set_text(self.qr_url)
-            self.draw_qr_code(198, 40+5, 96, code)
-        else:
-            image = bytearray(int(96 * 96 / 8))
-            open(config["profile_picture"], "r").readinto(image)
-            display.image(image, 96, 96, 198, 40)
+        self.picture.render(198, 40, 96)
+
 
 class AboutMePage():
-    def __init__(self, lines):
+    def __init__(self, lines, picture):
         self.lines = lines
+        self.picture = picture
+
     def render(self, config, state):
         display.rectangle(0, 0, 298, 40)
         display.thickness(4)
@@ -72,9 +83,7 @@ class AboutMePage():
             display.text(line, 8, y, scale=0.8)
             y += 25
 
-        image = bytearray(int(96 * 96 / 8))
-        open(config["profile_picture"], "r").readinto(image)
-        display.image(image, 96, 96, 198, 40)
+        self.picture.render(198, 40, 96)
 
 class StatusPage():
     def render(self, config, state):
@@ -181,7 +190,6 @@ def main(config):
 config = {
     "profile": "furry", # Dictates what the stored file is called
     "display_name": "Noah", # Name shown on header ??
-    "profile_picture": "pfp.bin",
     "counters": [
         {
             "key": "drinks",
@@ -198,9 +206,17 @@ config = {
     ],
     "pages": [
         # Page must implement `.render(config, state)` to be valid :D
-        AboutMePage(["barq.social", "Backend Engnr", "Free hugs!!"]),
-        CounterPage(""),
-        CounterPage("f.noahstride.co.uk"),
+        AboutMePage(
+            ["barq.social", "Backend Engnr", "Free hugs!!"],
+            ImagePicture("pfp.bin"),
+        ),
+        AboutMePage(
+            ["barq.social", "Backend Engnr", "Free hugs!!"],
+            QRPicture("f.noahstride.co.uk"),
+        ),
+        CounterPage(ImagePicture("pfp.bin")),
+        CounterPage(QRPicture("f.noahstride.co.uk")),
+        StatusPage()
     ]
 }
 main(config)
