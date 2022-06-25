@@ -54,7 +54,29 @@ class CounterPage():
             open(config["profile_picture"], "r").readinto(image)
             display.image(image, 96, 96, 198, 40)
 
-class InfoPage():
+class AboutMePage():
+    def __init__(self, lines):
+        self.lines = lines
+    def render(self, config, state):
+        display.rectangle(0, 0, 298, 40)
+        display.thickness(4)
+        display.font("sans")
+        display.pen(15)
+        display.text(config["display_name"] + "!", 86, 18, scale=1.2)
+        
+        # Text
+        display.thickness(2)
+        display.pen(0)
+        y = 60
+        for line in self.lines:
+            display.text(line, 8, y, scale=0.8)
+            y += 25
+
+        image = bytearray(int(96 * 96 / 8))
+        open(config["profile_picture"], "r").readinto(image)
+        display.image(image, 96, 96, 198, 40)
+
+class StatusPage():
     def render(self, config, state):
         display.thickness(2)
         display.font("sans")
@@ -176,9 +198,9 @@ config = {
     ],
     "pages": [
         # Page must implement `.render(config, state)` to be valid :D
+        AboutMePage(["barq.social", "Backend Engnr", "Free hugs!!"]),
         CounterPage(""),
         CounterPage("f.noahstride.co.uk"),
-        InfoPage(),
     ]
 }
 main(config)
