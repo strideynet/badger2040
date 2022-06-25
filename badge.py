@@ -3,11 +3,11 @@ import qrcode
 import json
 import os
 
-badger2040.system_speed(0) # lets save some battery
+badger2040.system_speed(badger2040.SYSTEM_NORMAL)
 
 display = badger2040.Badger2040()
 
-display.update_speed(2)
+display.update_speed(badger2040.UPDATE_FAST)
 
 class QRPicture():
     def __init__(self, url):
@@ -188,7 +188,7 @@ def main(config):
     state = load_state(config)
     render(config, state)
     while True:
-        display.halt()
+        # display.halt()
         
         changed = handle_input(state)
         if not changed:
