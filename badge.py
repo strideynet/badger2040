@@ -226,7 +226,7 @@ config = {
             QRPicture("f.noahstride.co.uk"),
         ),
         CounterPage(ImagePicture("pfp.bin")),
-        CounterPage(QRPicture("kep.woof")),
+        CounterPage(QRPicture("f.noahstride.co.uk")),
         StatusPage()
     ]
 }
