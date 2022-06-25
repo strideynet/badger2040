@@ -32,12 +32,11 @@ class QRPicture():
 
 class ImagePicture():
     def __init__(self, path):
-        self.path = path
+        self.data = bytearray(int(96 * 96 / 8))
+        open(path, "r").readinto(self.data)
     
     def render(self, x, y, size):
-        image = bytearray(int(96 * 96 / 8))
-        open(self.path, "r").readinto(image)
-        display.image(image, size, size, x, y)
+        display.image(self.data, size, size, x, y)
 
 class CounterPage():
     def __init__(self, picture):
@@ -87,9 +86,13 @@ class AboutMePage():
 
 class StatusPage():
     def render(self, config, state):
+        display.pen(12)
+        display.rectangle(0 , 0, badger2040.WIDTH, badger2040.HEIGHT)
+
+        display.pen(0)
         display.thickness(2)
-        display.font("sans")
-        display.text("Mystery third page", 0, 50, scale=1)
+        display.font("serif")
+        display.text("TODO: Status page??", 0, 50, scale=0.6)
 
 def handle_input(state):
     # Handle counters
