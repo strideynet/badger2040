@@ -75,7 +75,7 @@ def handle_input(state):
         return True
     
     # Handle pagination
-    page_max = 3
+    page_max = len(config["pages"])
     if display.pressed(badger2040.BUTTON_UP):
         state["page"] += 1
         if state["page"] >= page_max:
@@ -107,6 +107,11 @@ def load_state(config):
     for counter in config["counters"]:
         if counter["key"] not in state["counters"]:
             state["counters"][counter["key"]] = 0
+
+    # If number of configured pages has decreased, ensure current selected page
+    # does not exceed threshold.
+    if state["page"] >= len(config["pages"]):
+        state["page"] = len(config["pages"]) - 1
 
     return state
     
@@ -155,7 +160,6 @@ config = {
     "profile": "furry", # Dictates what the stored file is called
     "display_name": "Noah", # Name shown on header ??
     "profile_picture": "pfp.bin",
-    "qr_link": "f.noahstride.co.uk",
     "counters": [
         {
             "key": "drinks",
@@ -171,6 +175,7 @@ config = {
         }
     ],
     "pages": [
+        # Page must implement `.render(config, state)` to be valid :D
         CounterPage(""),
         CounterPage("f.noahstride.co.uk"),
         InfoPage(),
