@@ -11,7 +11,9 @@ display.update_speed(2)
 
 class QRPicture():
     def __init__(self, url):
-        self.url = url
+        code = qrcode.QRCode()
+        code.set_text(url)
+        self.code = code
 
     def measure_qr_code(self, size, code):
         w, h = code.get_size()
@@ -19,16 +21,22 @@ class QRPicture():
         return module_size * w, module_size
 
     def render(self, ox, oy, size):
-        code = qrcode.QRCode()
-        code.set_text(self.url)
-        size, module_size = self.measure_qr_code(size, code)
+        # TODO: Move more of this maths into the __init__ so we don't repeat it
+        actual_size, module_size = self.measure_qr_code(size, self.code)
+
+        # calculate adjustment for x, y
+        diff = size - actual_size
+        adjust = int(diff / 2)
+
+        # Draw white box for qr code to sit in
         display.pen(15)
-        display.rectangle(ox, oy, size, size)
+        display.rectangle(ox + adjust, oy + adjust, actual_size, actual_size)
+
         display.pen(0)
-        for x in range(size):
-            for y in range(size):
-                if code.get_module(x, y):
-                    display.rectangle(ox + x * module_size, oy + y * module_size, module_size, module_size)
+        for x in range(actual_size):
+            for y in range(actual_size):
+                if self.code.get_module(x, y):
+                    display.rectangle(ox + adjust + x * module_size, oy + adjust + y * module_size, module_size, module_size)
 
 class ImagePicture():
     def __init__(self, path):
@@ -218,7 +226,7 @@ config = {
             QRPicture("f.noahstride.co.uk"),
         ),
         CounterPage(ImagePicture("pfp.bin")),
-        CounterPage(QRPicture("f.noahstride.co.uk")),
+        CounterPage(QRPicture("kep.woof")),
         StatusPage()
     ]
 }
