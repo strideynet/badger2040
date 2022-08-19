@@ -9,6 +9,8 @@ import (
 
 	"tinygo.org/x/drivers/uc8151"
 	"tinygo.org/x/tinydraw"
+	"tinygo.org/x/tinyfont"
+	"tinygo.org/x/tinyfont/freemono"
 )
 
 var (
@@ -93,13 +95,40 @@ func main() {
 		log.Fatalf("%s\r\n", err)
 	}
 
+	if err := run(device); err != nil {
+		log.Fatalf("%s\r\n", err)
+	}
+}
+
+func run(device *Device) error {
 	device.ClearBuffer()
-	device.Display()
-	tinydraw.FilledRectangle(device, 0, 0, 100, 100, black)
-	device.Display()
+	if err := device.Display(); err != nil {
+		return err
+	}
+	if err := AboutMePage(device); err != nil {
+		return err
+	}
+	if err := device.Display(); err != nil {
+		return err
+	}
 
 	for {
+		device.ActLED.Set(!device.ActLED.Get())
 		time.Sleep(500 * time.Millisecond)
 		log.Printf("Hello from Badger2040\r\n")
 	}
+}
+
+func AboutMePage(device *Device) error {
+	barHeight := int16(40)
+	if err := tinydraw.FilledRectangle(device, 0, 0, w, barHeight, black); err != nil {
+		return err
+	}
+
+	name := "noah!"
+	iw, _ := tinyfont.LineWidth(&freemono.Bold12pt7b, name)
+	barTextY := (barHeight / 2) + 6 // text x, y is bottom left
+	tinyfont.WriteLine(device, &freemono.Bold12pt7b, w-(int16(iw)/2), barTextY, name, white)
+
+	return nil
 }
