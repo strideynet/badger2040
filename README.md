@@ -1,4 +1,5 @@
-# My Badger2040 setup
+# `badger2040`
 
-The idea is to eventually build this into a library that's easy to use and will
-let me have multiple badges.
+```sh
+tinygo flash --target=badger2040 ./main.go
+```
