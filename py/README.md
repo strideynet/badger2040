@@ -2,3 +2,5 @@
 
 The idea is to eventually build this into a library that's easy to use and will
 let me have multiple badges.
+
+This project was replaced by the go version :)
