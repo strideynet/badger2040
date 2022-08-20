@@ -13,6 +13,7 @@ import (
 	"tinygo.org/x/tinyfont/freemono"
 )
 
+// https://cdn.shopify.com/s/files/1/0174/1800/files/badger_2040_schematic.pdf?v=1645702148
 var (
 	black       = color.RGBA{1, 1, 1, 255}
 	white       = color.RGBA{0, 0, 0, 255}
@@ -58,19 +59,35 @@ func setupDisplay() (*uc8151.Device, error) {
 }
 
 func setupDevice() (*Device, error) {
+	machine.ENABLE_3V3.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	machine.ENABLE_3V3.High()
+
+	actLED := machine.LED
+	actLED.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
 	aBtn := machine.BUTTON_A
 	aBtn.Configure(machine.PinConfig{Mode: machine.PinInput})
 	bBtn := machine.BUTTON_B
 	bBtn.Configure(machine.PinConfig{Mode: machine.PinInput})
 	cBtn := machine.BUTTON_C
 	cBtn.Configure(machine.PinConfig{Mode: machine.PinInput})
-	upBtn := machine.BUTTON_UP
-	upBtn.Configure(machine.PinConfig{Mode: machine.PinInput})
-	downBtn := machine.BUTTON_DOWN
-	downBtn.Configure(machine.PinConfig{Mode: machine.PinInput})
 
-	actLED := machine.LED
-	actLED.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	upBtn := machine.BUTTON_UP
+	upBtn.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
+	err := upBtn.SetInterrupt(machine.PinRising, func(p machine.Pin) {
+		actLED.Set(true)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("setting up interrupt: %w", err)
+	}
+	downBtn := machine.BUTTON_DOWN
+	downBtn.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
+	err = downBtn.SetInterrupt(machine.PinRising, func(p machine.Pin) {
+		actLED.Set(false)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("setting up interrupt: %w", err)
+	}
 
 	display, err := setupDisplay()
 	if err != nil {
@@ -113,7 +130,6 @@ func run(device *Device) error {
 	}
 
 	for {
-		device.ActLED.Set(!device.ActLED.Get())
 		time.Sleep(500 * time.Millisecond)
 		log.Printf("Hello from Badger2040\r\n")
 	}
@@ -126,9 +142,13 @@ func AboutMePage(device *Device) error {
 	}
 
 	name := "noah!"
-	iw, _ := tinyfont.LineWidth(&freemono.Bold12pt7b, name)
-	barTextY := (barHeight / 2) + 6 // text x, y is bottom left
-	tinyfont.WriteLine(device, &freemono.Bold12pt7b, w-(int16(iw)/2), barTextY, name, white)
+	font := &freemono.Bold18pt7b
+	// Center some text!
+	// text x, y is bottom left, rather than top left as you might expect
+	iw, _ := tinyfont.LineWidth(font, name)
+	barTextY := (barHeight / 2) + (18 / 2) // 18 is font height
+	barTextX := (w / 2) - (int16(iw) / 2)
+	tinyfont.WriteLine(device, font, barTextX, barTextY, name, white)
 
 	return nil
 }
